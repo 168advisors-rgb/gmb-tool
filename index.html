@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painter Growth — GMB Content Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;600;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy: #1B2F5B;
+    --navy-dark: #122047;
+    --navy-mid: #243d73;
+    --gold: #C8981E;
+    --gold-light: #F0C040;
+    --gold-pale: #FDF3D8;
+    --gold-border: #e8d8a0;
+    --offwhite: #F8F7F4;
+    --grey: #6B6960;
+    --border: #DCD9D0;
+    --white: #ffffff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Figtree', sans-serif; background: var(--offwhite); color: #1a1a1a; min-height: 100vh; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy-dark);
+    padding: 0 40px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    border-bottom: 3px solid var(--gold);
+  }
+  header img { height: 36px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e3a6e 100%);
+    padding: 48px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,152,30,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(200,152,30,0.2);
+    border: 1px solid rgba(200,152,30,0.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold-light);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+  .hero h1 span { color: var(--gold-light); }
+  .hero p { color: rgba(255,255,255,0.6); font-size: 15px; font-weight: 300; max-width: 540px; line-height: 1.6; }
+
+  /* ── MAIN ── */
+  main { max-width: 860px; margin: 0 auto; padding: 36px 24px 100px; }
+
+  /* ── PROGRESS ── */
+  .progress-bar { display: flex; align-items: center; margin-bottom: 32px; padding: 0 4px; }
+  .progress-step { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .progress-step:last-child { flex: 0; }
+  .progress-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--border); color: var(--grey);
+    font-size: 13px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.3s;
+  }
+  .progress-dot.active { background: var(--navy); color: #fff; }
+  .progress-dot.done { background: var(--gold); color: var(--navy-dark); }
+  .progress-line { flex: 1; height: 2px; background: var(--border); margin: 0 4px; transition: background 0.3s; }
+  .progress-line.done { background: var(--gold); }
+  .progress-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--grey); white-space: nowrap; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gold);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 20px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .step-num { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .card-header h2 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--navy); }
+  .card-header p { font-size: 12px; color: var(--grey); font-weight: 300; margin-top: 1px; }
+
+  /* ── FORM ── */
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--navy); margin-bottom: 7px; }
+  label .hint { font-weight: 300; text-transform: none; letter-spacing: 0; color: var(--grey); font-size: 11px; }
+  input[type="text"], input[type="email"], input[type="tel"], textarea, select {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 11px 14px;
+    font-family: 'Figtree', sans-serif; font-size: 14px; color: #1a1a1a; background: var(--offwhite);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; outline: none; -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,152,30,0.15); background: #fff; }
+  textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── CHIPS ── */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1.5px solid var(--border); border-radius: 6px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--grey); background: #fff; transition: all 0.15s; user-select: none; line-height: 1; }
+  .chip:hover { border-color: var(--navy); color: var(--navy); }
+  .chip.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .chip.single.on { background: var(--gold); color: var(--navy-dark); border-color: var(--gold); }
+
+  /* ── BUTTONS ── */
+  .btn-gold { background: var(--gold); color: var(--navy-dark); border: none; border-radius: 8px; padding: 13px 28px; font-family: 'Figtree', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; transition: background 0.15s, transform 0.1s, box-shadow 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(200,152,30,0.35); }
+  .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-outline { background: transparent; color: var(--navy); border: 2px solid var(--navy); border-radius: 8px; padding: 11px 22px; font-family: 'Figtree', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 7px; }
+  .btn-outline:hover { background: var(--navy); color: #fff; }
+  .btn-row { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+
+  /* ── NOTICE ── */
+  .notice { background: var(--gold-pale); border: 1px solid var(--gold-border); border-radius: 10px; padding: 14px 18px; font-size: 13px; color: var(--grey); margin-bottom: 20px; line-height: 1.6; }
+  .notice strong { color: var(--navy); }
+  .required-star { color: var(--gold); }
+
+  /* ── ERROR ── */
+  .error-box { background: #fff0f0; border: 1px solid #ffcdd2; border-radius: 8px; padding: 16px 18px; font-size: 13px; color: #c62828; font-weight: 600; margin-top: 16px; display: none; }
+  .error-box.visible { display: block; }
+
+  /* ── LOADING ── */
+  #loading-screen { display: none; text-align: center; padding: 64px 24px; }
+  #loading-screen.active { display: block; }
+  .spinner { width: 52px; height: 52px; border: 4px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 24px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-title { font-size: 20px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .loading-sub { font-size: 14px; color: var(--grey); font-weight: 300; max-width: 380px; margin: 0 auto; line-height: 1.6; }
+  .loading-steps { margin-top: 36px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .loading-step { font-size: 13px; font-weight: 600; color: var(--grey); display: flex; align-items: center; gap: 10px; opacity: 0.35; transition: opacity 0.4s, color 0.4s; }
+  .loading-step.active { opacity: 1; color: var(--navy); }
+  .loading-step.done { opacity: 1; color: #27ae60; }
+  .step-icon { font-size: 15px; width: 22px; text-align: center; }
+
+  /* ── RESULTS ── */
+  #results-screen { display: none; }
+  #results-screen.active { display: block; }
+  .results-banner { background: linear-gradient(135deg, var(--navy), var(--navy-mid)); border-radius: 14px; padding: 28px; margin-bottom: 0; border-bottom: 4px solid var(--gold); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-radius: 14px 14px 0 0; }
+  .results-banner h2 { font-size: 20px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 0.05em; }
+  .results-banner p { color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 300; margin-top: 4px; }
+
+  /* ── OUTPUT TABS ── */
+  .output-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); background: #fff; }
+  .output-tab { background: none; border: none; font-family: 'Figtree', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--grey); padding: 14px 22px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; white-space: nowrap; }
+  .output-tab:hover { color: var(--navy); }
+  .output-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+  .output-pane { display: none; }
+  .output-pane.active { display: block; }
+  .output-card { background: var(--white); border: 1px solid var(--border); border-top: none; border-radius: 0 0 14px 14px; overflow: hidden; margin-bottom: 24px; }
+  .output-meta { background: var(--gold-pale); border-bottom: 1px solid var(--gold-border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .output-meta-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); }
+  .char-count { font-size: 11px; color: var(--grey); font-weight: 600; }
+  .output-content { padding: 24px; font-size: 14px; line-height: 1.8; color: #2a2a2a; white-space: pre-wrap; font-weight: 300; min-height: 120px; }
+  .output-actions { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
+  .copy-btn { background: var(--gold); color: var(--navy-dark); border: none; border-radius: 7px; padding: 10px 20px; font-family: 'Figtree', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .copy-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .copy-btn.copied { background: #6fcf97; color: #1a3a1a; }
+  .gmb-tip { font-size: 11px; color: var(--grey); font-weight: 400; }
+</style>
+</head>
+<body>
+
+<!-- ─────────────────────────────────────
+  ⚙️  YOUR PROXY URL — UPDATE THIS
+  After deploying to Railway, paste your
+  Railway URL below (no trailing slash).
+  Example: https://your-app.railway.app
+───────────────────────────────────────── -->
+<script>
+  const PROXY_URL = 'https://painter-growth-proxy-production.up.railway.app';
+  const FORMSPREE_ID = 'xgonzvbj';
+</script>
+
+<header>
+  <img src="https://images.squarespace-cdn.com/content/v1/698f609321c0d00ee6a78a86/dacbdbc7-6723-4044-9cd3-aa920bd67e88/2026-01-12-Painter-Growth-Logo-Horizontal-Reveresed.png?format=400w" alt="Painter Growth" />
+</header>
+
+<div class="hero">
+  <div class="hero-badge">Free GMB Optimizer</div>
+  <h1>Get Your Google Business Profile<br/><span>Content — Instantly</span></h1>
+  <p>Fill out the form below and we'll generate a complete, ready-to-publish GMB description, services section, and Q&A — powered by AI, built for painters.</p>
+</div>
+
+<main>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar">
+    <div class="progress-step">
+      <div class="progress-dot active" id="pd1">1</div>
+      <span class="progress-label" style="color:var(--navy)">Your Business</span>
+    </div>
+    <div class="progress-line" id="pl1"></div>
+    <div class="progress-step">
+      <div class="progress-dot" id="pd2">2</div>
+      <span class="progress-label">Services</span>
+    </div>
+    <div class="progress-line" id="pl2"></div>
+    <div class="progress-step">
+      <div class="progress-dot" id="pd3">3</div>
+      <span class="progress-label">Your Edge</span>
+    </div>
+    <div class="progress-line" id="pl3"></div>
+    <div class="progress-step">
+      <div class="progress-dot" id="pd4">✓</div>
+      <span class="progress-label">Your Content</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════ INTAKE FORM ═══════════════ -->
+  <div id="intakePanel">
+
+    <div class="notice">
+      <strong>Takes about 3 minutes.</strong> The more detail you provide, the better your GMB content will be. Fields marked <span class="required-star">*</span> are required.
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num">1</div>
+        <div><h2>Your Business</h2><p>Basic info about your painting company</p></div>
+      </div>
+      <div class="two-col">
+        <div class="field"><label>Business Name <span class="required-star">*</span></label><input type="text" id="f-name" placeholder="e.g. Summit Painting Co." /></div>
+        <div class="field"><label>Your Name <span class="required-star">*</span></label><input type="text" id="f-contact" placeholder="e.g. Mike Sullivan" /></div>
+      </div>
+      <div class="two-col">
+        <div class="field"><label>Email Address <span class="required-star">*</span></label><input type="email" id="f-email" placeholder="mike@summitpainting.com" /></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="f-phone" placeholder="(555) 000-0000" /></div>
+      </div>
+      <div class="two-col">
+        <div class="field"><label>City / Region Served <span class="required-star">*</span></label><input type="text" id="f-city" placeholder="e.g. Denver Metro, CO" /></div>
+        <div class="field"><label>Years in Business</label><input type="text" id="f-years" placeholder="e.g. 8 years" /></div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num">2</div>
+        <div><h2>Services You Offer</h2><p>Select everything that applies</p></div>
+      </div>
+      <div class="field">
+        <label>Primary Services <span class="required-star">*</span> <span class="hint">(select all that apply)</span></label>
+        <div class="chips" id="servChips">
+          <span class="chip" data-v="Interior Painting">Interior Painting</span>
+          <span class="chip" data-v="Exterior Painting">Exterior Painting</span>
+          <span class="chip" data-v="Cabinet Painting">Cabinet Painting</span>
+          <span class="chip" data-v="Deck Staining">Deck Staining</span>
+          <span class="chip" data-v="Fence Staining">Fence Staining</span>
+          <span class="chip" data-v="Commercial Painting">Commercial Painting</span>
+          <span class="chip" data-v="Epoxy Floors">Epoxy Floors</span>
+          <span class="chip" data-v="Pressure Washing">Pressure Washing</span>
+          <span class="chip" data-v="Drywall Repair">Drywall Repair</span>
+          <span class="chip" data-v="Color Consulting">Color Consulting</span>
+          <span class="chip" data-v="Wallpaper Removal">Wallpaper Removal</span>
+          <span class="chip" data-v="Popcorn Ceiling Removal">Popcorn Ceiling Removal</span>
+        </div>
+      </div>
+      <div class="field"><label>Any other services? <span class="hint">(optional)</span></label><input type="text" id="f-services-other" placeholder="e.g. Venetian plaster, faux finishes..." /></div>
+      <div class="two-col">
+        <div class="field">
+          <label>Primary Customer Type <span class="required-star">*</span></label>
+          <select id="f-customer">
+            <option value="">Select...</option>
+            <option>Homeowners (residential)</option>
+            <option>Property managers</option>
+            <option>Commercial businesses</option>
+            <option>Mix of residential & commercial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Typical Project Size</label>
+          <select id="f-projsize">
+            <option value="">Select...</option>
+            <option>Small jobs ($300–$1,000)</option>
+            <option>Mid-size ($1,000–$5,000)</option>
+            <option>Larger projects ($5,000+)</option>
+            <option>Mix of all sizes</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num">3</div>
+        <div><h2>What Makes You Different</h2><p>This is what separates you from every other painter in town</p></div>
+      </div>
+      <div class="field">
+        <label>Key Differentiators <span class="required-star">*</span> <span class="hint">(select all that apply)</span></label>
+        <div class="chips" id="diffChips">
+          <span class="chip" data-v="Licensed & Insured">Licensed & Insured</span>
+          <span class="chip" data-v="Free Estimates">Free Estimates</span>
+          <span class="chip" data-v="Satisfaction Guarantee">Satisfaction Guarantee</span>
+          <span class="chip" data-v="Family-Owned">Family-Owned</span>
+          <span class="chip" data-v="Eco-Friendly Paints">Eco-Friendly Paints</span>
+          <span class="chip" data-v="Background-Checked Crew">Background-Checked Crew</span>
+          <span class="chip" data-v="Weekend Availability">Weekend Availability</span>
+          <span class="chip" data-v="Same-Week Scheduling">Same-Week Scheduling</span>
+          <span class="chip" data-v="No Subcontractors">No Subcontractors</span>
+          <span class="chip" data-v="5-Star Rated">5-Star Rated</span>
+          <span class="chip" data-v="Fully Uniformed Crew">Fully Uniformed Crew</span>
+          <span class="chip" data-v="Daily Cleanup">Daily Cleanup</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tone of Voice <span class="required-star">*</span></label>
+        <div class="chips" id="toneChips">
+          <span class="chip single" data-v="Professional & polished">Professional & polished</span>
+          <span class="chip single" data-v="Friendly & approachable">Friendly & approachable</span>
+          <span class="chip single" data-v="Bold & confident">Bold & confident</span>
+          <span class="chip single" data-v="Warm & community-focused">Warm & community-focused</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Why do customers choose you? <span class="required-star">*</span></label>
+        <textarea id="f-why" placeholder="e.g. We're detail-obsessed. Every surface gets properly prepped before a brush touches it, and we clean up completely each day..."></textarea>
+      </div>
+      <div class="field"><label>Awards, Certifications, or Milestones <span class="hint">(optional)</span></label><input type="text" id="f-awards" placeholder="e.g. BBB A+ rating, Angi Super Service Award, 500+ completed jobs..." /></div>
+      <div class="field"><label>Anything else to include? <span class="hint">(optional)</span></label><textarea id="f-other" placeholder="Specific neighborhoods, specialties, offers, senior discounts, etc." style="min-height:70px;"></textarea></div>
+    </div>
+
+    <div class="error-box" id="formError"></div>
+
+    <div class="btn-row">
+      <button class="btn-gold" onclick="submitForm()" id="generateBtn">
+        <span>Generate My GMB Content</span><span>→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ LOADING ═══════════════ -->
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-title">Building Your GMB Content</div>
+    <div class="loading-sub">AI is writing your custom content. This usually takes 15–20 seconds.</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="ls1"><span class="step-icon">📤</span>Sending your info</div>
+      <div class="loading-step" id="ls2"><span class="step-icon">✍️</span>Writing GMB description</div>
+      <div class="loading-step" id="ls3"><span class="step-icon">🗂️</span>Writing services section</div>
+      <div class="loading-step" id="ls4"><span class="step-icon">💬</span>Generating Q&A pairs</div>
+      <div class="loading-step" id="ls5"><span class="step-icon">✅</span>Finalizing your content</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ RESULTS ═══════════════ -->
+  <div id="results-screen">
+    <div class="results-banner">
+      <div>
+        <h2>Your GMB Content Is Ready</h2>
+        <p id="results-sub">Copy each section and paste directly into Google Business Profile.</p>
+      </div>
+      <button class="btn-outline" onclick="startOver()" style="color:#fff;border-color:rgba(255,255,255,0.4)">← Start Over</button>
+    </div>
+
+    <div class="output-tabs">
+      <button class="output-tab active" onclick="switchOutput('desc',this)">📝 Description</button>
+      <button class="output-tab" onclick="switchOutput('serv',this)">🗂️ Services</button>
+      <button class="output-tab" onclick="switchOutput('qa',this)">💬 Q&A Pairs</button>
+    </div>
+
+    <div class="output-pane active" id="pane-desc">
+      <div class="output-card">
+        <div class="output-meta">
+          <div class="output-meta-label">GMB Business Description</div>
+          <div class="char-count" id="desc-chars">0 / 750 characters</div>
+        </div>
+        <div class="output-content" id="out-desc"></div>
+        <div class="output-actions">
+          <span class="gmb-tip">Paste into: Google Business Profile → Edit profile → Business description</span>
+          <button class="copy-btn" onclick="copyOut('out-desc',this)">📋 Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-pane" id="pane-serv">
+      <div class="output-card">
+        <div class="output-meta">
+          <div class="output-meta-label">GMB Services Section</div>
+        </div>
+        <div class="output-content" id="out-serv"></div>
+        <div class="output-actions">
+          <span class="gmb-tip">Paste into: Google Business Profile → Edit profile → Services</span>
+          <button class="copy-btn" onclick="copyOut('out-serv',this)">📋 Copy All</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-pane" id="pane-qa">
+      <div class="output-card">
+        <div class="output-meta">
+          <div class="output-meta-label">GMB Q&A Pairs</div>
+        </div>
+        <div class="output-content" id="out-qa"></div>
+        <div class="output-actions">
+          <span class="gmb-tip">In GMB: click "Ask a question" yourself, then answer from your business account</span>
+          <button class="copy-btn" onclick="copyOut('out-qa',this)">📋 Copy All</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════
+// CHIPS
+// ═══════════════════════════════════════
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    if (c.classList.contains('single')) {
+      c.closest('.chips').querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+    }
+    c.classList.toggle('on');
+  });
+});
+function getChips(id) {
+  return [...document.querySelectorAll(`#${id} .chip.on`)].map(c => c.dataset.v);
+}
+
+// ═══════════════════════════════════════
+// VALIDATION & SUBMIT
+// ═══════════════════════════════════════
+function g(id) { return document.getElementById(id)?.value?.trim() || ''; }
+
+function showError(msg) {
+  const el = document.getElementById('formError');
+  el.textContent = msg;
+  el.classList.add('visible');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function clearError() { document.getElementById('formError').classList.remove('visible'); }
+
+async function submitForm() {
+  clearError();
+  if (!g('f-name'))     return showError('Please enter your business name.');
+  if (!g('f-contact'))  return showError('Please enter your name.');
+  if (!g('f-email'))    return showError('Please enter your email address.');
+  if (!g('f-city'))     return showError('Please enter your city / region.');
+  if (!getChips('servChips').length) return showError('Please select at least one service.');
+  if (!g('f-customer')) return showError('Please select your primary customer type.');
+  if (!getChips('diffChips').length) return showError('Please select at least one differentiator.');
+  if (!getChips('toneChips').length) return showError('Please select a tone of voice.');
+  if (!g('f-why'))      return showError('Please tell us why customers choose you.');
+
+  const data = {
+    name:     g('f-name'),
+    contact:  g('f-contact'),
+    email:    g('f-email'),
+    phone:    g('f-phone'),
+    city:     g('f-city'),
+    years:    g('f-years'),
+    services: [...getChips('servChips'), g('f-services-other')].filter(Boolean),
+    customer: g('f-customer'),
+    projsize: g('f-projsize'),
+    diff:     getChips('diffChips'),
+    tone:     getChips('toneChips')[0],
+    why:      g('f-why'),
+    awards:   g('f-awards'),
+    other:    g('f-other'),
+  };
+
+  showLoading();
+
+  // Fire Formspree silently for your records
+  if (FORMSPREE_ID && FORMSPREE_ID !== 'YOUR_FORMSPREE_ID') {
+    sendToFormspree(data).catch(() => {});
+  }
+
+  setStep(1);
+  await delay(300);
+  setStep(2);
+
+  try {
+    const [desc, serv, qa] = await Promise.all([
+      callProxy(buildDescPrompt(data)),
+      callProxy(buildServPrompt(data)),
+      callProxy(buildQAPrompt(data)),
+    ]);
+
+    setStep(3); await delay(250);
+    setStep(4); await delay(250);
+    setStep(5); await delay(400);
+
+    showResults(desc, serv, qa, data.name);
+  } catch(err) {
+    hideLoading();
+    showError('Generation failed: ' + err.message);
+  }
+}
+
+// ═══════════════════════════════════════
+// PROXY CALL
+// ═══════════════════════════════════════
+async function callProxy(prompt) {
+  const res = await fetch(PROXY_URL + '/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error || `Server error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.text || '';
+}
+
+// ═══════════════════════════════════════
+// FORMSPREE
+// ═══════════════════════════════════════
+async function sendToFormspree(data) {
+  const body = new FormData();
+  Object.entries({
+    'Business Name': data.name, 'Contact': data.contact,
+    'Email': data.email, 'Phone': data.phone,
+    'City': data.city, 'Years': data.years,
+    'Services': data.services.join(', '),
+    'Customer Type': data.customer, 'Project Size': data.projsize,
+    'Differentiators': data.diff.join(', '), 'Tone': data.tone,
+    'Why Choose Them': data.why, 'Awards': data.awards, 'Notes': data.other,
+  }).forEach(([k,v]) => body.append(k, v));
+  await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+    method: 'POST', body, headers: { Accept: 'application/json' }
+  });
+}
+
+// ═══════════════════════════════════════
+// PROMPTS
+// ═══════════════════════════════════════
+function buildDescPrompt(d) {
+  return `You are a local SEO expert specializing in Google Business Profiles for painting contractors.
+
+Write a GMB business description. Requirements:
+- 750 characters or fewer (HARD LIMIT)
+- ${d.tone} tone
+- Keyword-rich for local search (include city and services naturally)
+- Targeted toward ${d.customer}
+- No fluff — every sentence earns its place
+- Output the description text ONLY — no label, no quote marks, no character count
+
+Business: ${d.name} | ${d.city} | ${d.years || 'established'}
+Services: ${d.services.join(', ')}
+Differentiators: ${d.diff.join(', ')}
+Why customers choose them: ${d.why}${d.awards ? '\nAwards: ' + d.awards : ''}${d.other ? '\nAdditional: ' + d.other : ''}`;
+}
+
+function buildServPrompt(d) {
+  return `You are a local SEO expert writing Google Business Profile service listings for a painting contractor.
+
+For each service write:
+- Service name: short, keyword-rich (3–6 words)
+- Description: 1–2 sentences, 50–120 characters, benefit-focused and locally optimized
+
+Business: ${d.name} | ${d.city} | Target: ${d.customer}
+
+Services:
+${d.services.map((s,i) => `${i+1}. ${s}`).join('\n')}
+
+Format:
+SERVICE: [name]
+DESCRIPTION: [description]
+
+Separate each entry with a blank line. Output service entries only — no intro or closing text.`;
+}
+
+function buildQAPrompt(d) {
+  return `You are a local SEO expert creating Google Business Profile Q&A pairs for a painting contractor.
+
+Generate 8 Q&A pairs. Requirements:
+- Questions reflect real homeowner searches before hiring a painter
+- Answers include city/region and service keywords naturally
+- Each answer: 2–4 sentences, conversational but informative
+- Cover: pricing, process, credentials, turnaround, guarantees, specific services
+
+Business: ${d.name} | ${d.city}
+Services: ${d.services.join(', ')}
+Differentiators: ${d.diff.join(', ')}
+Why they stand out: ${d.why}${d.awards ? '\nAwards: ' + d.awards : ''}
+
+Format:
+Q: [question]
+A: [answer]
+
+Separate each pair with a blank line. Output Q&A pairs only — no intro or closing text.`;
+}
+
+// ═══════════════════════════════════════
+// LOADING UI
+// ═══════════════════════════════════════
+function showLoading() {
+  document.getElementById('intakePanel').style.display = 'none';
+  document.getElementById('loading-screen').classList.add('active');
+  document.getElementById('results-screen').classList.remove('active');
+  document.getElementById('results-screen').style.display = 'none';
+  document.querySelectorAll('.loading-step').forEach(s => s.classList.remove('active','done'));
+  ['pd1','pd2','pd3'].forEach(id => document.getElementById(id).className = 'progress-dot done');
+  document.getElementById('pd4').className = 'progress-dot active';
+  ['pl1','pl2','pl3'].forEach(id => document.getElementById(id).classList.add('done'));
+}
+function hideLoading() {
+  document.getElementById('loading-screen').classList.remove('active');
+  document.getElementById('intakePanel').style.display = 'block';
+}
+function setStep(n) {
+  for (let i = 1; i < n; i++) {
+    const el = document.getElementById('ls'+i);
+    if (el) { el.classList.remove('active'); el.classList.add('done'); }
+  }
+  const el = document.getElementById('ls'+n);
+  if (el) el.classList.add('active');
+}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ═══════════════════════════════════════
+// RESULTS UI
+// ═══════════════════════════════════════
+function showResults(desc, serv, qa, name) {
+  document.getElementById('loading-screen').classList.remove('active');
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'block';
+  rs.classList.add('active');
+  rs.scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('results-sub').textContent = `Ready for ${name}. Copy each section below.`;
+  document.getElementById('out-desc').textContent = desc.trim();
+  document.getElementById('out-serv').textContent = serv.trim();
+  document.getElementById('out-qa').textContent   = qa.trim();
+  const len = desc.trim().length;
+  const cc = document.getElementById('desc-chars');
+  cc.textContent = `${len} / 750 characters ${len > 750 ? '⚠ Over limit' : '✓'}`;
+  cc.style.color = len > 750 ? '#c62828' : '#27ae60';
+}
+
+function switchOutput(pane, btn) {
+  document.querySelectorAll('.output-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.output-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-'+pane).classList.add('active');
+  btn.classList.add('active');
+}
+
+function copyOut(id, btn) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2500);
+  });
+}
+
+function startOver() {
+  document.getElementById('results-screen').classList.remove('active');
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('intakePanel').style.display = 'block';
+  ['pd2','pd3','pd4'].forEach(id => document.getElementById(id).className = 'progress-dot');
+  document.getElementById('pd1').className = 'progress-dot active';
+  ['pl1','pl2','pl3'].forEach(id => document.getElementById(id).classList.remove('done'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
